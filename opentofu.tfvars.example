@@ -1,0 +1,10 @@
+# Copy this file to opentofu.tfvars and fill in your values
+# opentofu.tfvars is gitignored for security
+
+# Your Gmail address where emails should be forwarded
+forward_to_email = "your-email@gmail.com"
+
+# Optional: Override defaults
+# domain_name = "jimmillerdrums.com"
+# aws_region = "us-east-1"
+# environment = "prod"

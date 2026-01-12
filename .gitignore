@@ -1,0 +1,33 @@
+# OpenTofu
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+opentofu.tfvars
+
+# Lambda deployment packages
+*.zip
+lambda/dist/
+lambda/node_modules/
+
+# Rust
+lambda/target/
+lambda/Cargo.lock
+bootstrap
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local

@@ -1,11 +1,11 @@
 # OpenTofu
-.terraform/
-.terraform.lock.hcl
-*.tfstate
-*.tfstate.*
-*.tfvars
-*.tfvars.json
-opentofu.tfvars
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfvars
+infra/*.tfvars.json
+infra/opentofu.tfvars
 
 # Lambda deployment packages
 *.zip

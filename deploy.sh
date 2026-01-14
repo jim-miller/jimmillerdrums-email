@@ -14,7 +14,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_NAME="jimmillerdrums-email"
-TFVARS_FILE="opentofu.tfvars"
+TFVARS_FILE="infra/opentofu.tfvars"
+INFRA_DIR="infra"
 
 # Functions
 print_header() {
@@ -63,7 +64,7 @@ check_prerequisites() {
     # Check if tfvars file exists
     if [ ! -f "$TFVARS_FILE" ]; then
         print_error "Configuration file $TFVARS_FILE not found."
-        echo "Please copy opentofu.tfvars.example to opentofu.tfvars and configure it."
+        echo "Please copy infra/opentofu.tfvars.example to infra/opentofu.tfvars and configure it."
         exit 1
     fi
     print_status "Configuration file found"
@@ -87,7 +88,7 @@ deploy_infrastructure() {
     
     # Initialize OpenTofu
     echo "Initializing OpenTofu..."
-    if tofu init; then
+    if (cd "$INFRA_DIR" && tofu init); then
         print_status "OpenTofu initialized"
     else
         print_error "Failed to initialize OpenTofu"
@@ -96,7 +97,7 @@ deploy_infrastructure() {
     
     # Plan deployment
     echo "Planning deployment..."
-    if tofu plan -var-file="$TFVARS_FILE"; then
+    if (cd "$INFRA_DIR" && tofu plan -var-file="opentofu.tfvars"); then
         print_status "Deployment plan created"
     else
         print_error "Failed to create deployment plan"
@@ -109,7 +110,7 @@ deploy_infrastructure() {
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "Applying changes..."
-        if tofu apply -var-file="$TFVARS_FILE" -auto-approve; then
+        if (cd "$INFRA_DIR" && tofu apply -var-file="opentofu.tfvars" -auto-approve); then
             print_status "Infrastructure deployed successfully"
         else
             print_error "Failed to deploy infrastructure"
@@ -166,7 +167,7 @@ check_status() {
 
 show_outputs() {
     echo "Infrastructure outputs:"
-    tofu output
+    (cd "$INFRA_DIR" && tofu output)
     echo
 }
 
@@ -206,7 +207,7 @@ destroy_infrastructure() {
     read -p "Are you sure you want to destroy the infrastructure? (type 'yes' to confirm): " -r
     if [ "$REPLY" = "yes" ]; then
         echo "Destroying infrastructure..."
-        if tofu destroy -var-file="$TFVARS_FILE" -auto-approve; then
+        if (cd "$INFRA_DIR" && tofu destroy -var-file="opentofu.tfvars" -auto-approve); then
             print_status "Infrastructure destroyed"
         else
             print_error "Failed to destroy infrastructure"

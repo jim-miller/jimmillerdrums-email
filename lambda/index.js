@@ -37,6 +37,22 @@ exports.handler = async (event) => {
         const fromMatch = originalEmail.match(/^From: (.*)$/m);
         const originalFrom = fromMatch ? fromMatch[1] : source;
         
+        // Extract sender name and email from From header
+        let senderName = source;
+        let senderEmail = source;
+        const nameEmailMatch = originalFrom.match(/^"?([^"<]+)"?\s*<?([^>]+)>?$/);
+        if (nameEmailMatch) {
+            senderName = nameEmailMatch[1].trim();
+            senderEmail = nameEmailMatch[2].trim();
+        } else {
+            // Just email address, no name
+            const emailMatch = originalFrom.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+            if (emailMatch) {
+                senderEmail = emailMatch[1];
+                senderName = senderEmail.split('@')[0];
+            }
+        }
+        
         // Extract email body and parse MIME content
         const bodyStart = originalEmail.indexOf('\r\n\r\n');
         const rawBody = bodyStart !== -1 ? originalEmail.substring(bodyStart + 4) : originalEmail;
@@ -53,11 +69,11 @@ exports.handler = async (event) => {
         }
         
         const params = {
-            Source: 'jim@jimmillerdrums.com',
+            Source: `"${senderName} (via jimmillerdrums.com)" <jim@jimmillerdrums.com>`,
             Destination: {
                 ToAddresses: [forwardToEmail]
             },
-            ReplyToAddresses: [source],
+            ReplyToAddresses: [senderEmail],
             Message: {
                 Subject: {
                     Data: subject,

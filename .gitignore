@@ -9,7 +9,6 @@ infra/opentofu.tfvars
 
 # Lambda deployment packages
 *.zip
-lambda/dist/
 lambda/node_modules/
 
 # Rust

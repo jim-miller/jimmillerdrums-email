@@ -1,22 +1,7 @@
-# Build Rust Lambda function
-resource "null_resource" "build_lambda" {
-  triggers = {
-    # Rebuild when source code changes
-    source_hash = filebase64sha256("${path.module}/lambda/src/main.rs")
-    cargo_hash  = filebase64sha256("${path.module}/lambda/Cargo.toml")
-  }
-
-  provisioner "local-exec" {
-    command = "cd ${path.module} && ./build.sh"
-  }
-}
-
-# Archive Lambda function code
+# Archive Lambda function code (temporary Node.js version)
 data "archive_file" "lambda_zip" {
-  depends_on = [null_resource.build_lambda]
-  
   type        = "zip"
-  source_file = "${path.module}/lambda/target/lambda/bootstrap/bootstrap"
+  source_file = "${path.module}/lambda-temp.js"
   output_path = "${path.module}/lambda.zip"
 }
 
@@ -25,8 +10,8 @@ resource "aws_lambda_function" "email_processor" {
   filename         = data.archive_file.lambda_zip.output_path
   function_name    = "${var.project_name}-processor"
   role            = aws_iam_role.lambda_email_processor.arn
-  handler         = "bootstrap"
-  runtime         = "provided.al2023"
+  handler         = "lambda-temp.handler"
+  runtime         = "nodejs16.x"
   timeout         = 60
   memory_size     = 256
   architectures    = ["x86_64"]
@@ -44,7 +29,6 @@ resource "aws_lambda_function" "email_processor" {
     aws_iam_role_policy_attachment.lambda_basic_execution,
     aws_iam_role_policy.lambda_s3_access,
     aws_iam_role_policy.lambda_ses_access,
-    null_resource.build_lambda,
   ]
 }
 

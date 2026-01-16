@@ -27,3 +27,21 @@ variable "project_name" {
   type        = string
   default     = "jimmillerdrums-email"
 }
+
+variable "critical_alarm_email" {
+  description = "Email address for critical alarms (P1)"
+  type        = string
+  default     = "alerts-critical@jimmillerdrums.com"
+}
+
+variable "warning_alarm_email" {
+  description = "Email address for warning alarms (P2)"
+  type        = string
+  default     = "alerts-warning@jimmillerdrums.com"
+}
+
+variable "info_alarm_email" {
+  description = "Email address for informational alarms (P3)"
+  type        = string
+  default     = "alerts-info@jimmillerdrums.com"
+}

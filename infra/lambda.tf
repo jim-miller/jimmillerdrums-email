@@ -1,7 +1,7 @@
 # Archive Lambda function code
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/../lambda/index.js"
+  source_file = "${path.module}/../rust-lambda/target/lambda/email-processor/bootstrap"
   output_path = "${path.module}/.terraform/lambda.zip"
 }
 
@@ -10,11 +10,11 @@ resource "aws_lambda_function" "email_processor" {
   filename         = data.archive_file.lambda_zip.output_path
   function_name    = "${var.project_name}-processor"
   role            = aws_iam_role.lambda_email_processor.arn
-  handler         = "index.handler"
-  runtime         = "nodejs20.x"
+  handler         = "bootstrap"
+  runtime         = "provided.al2023"
   timeout         = 60
   memory_size     = 256
-  architectures    = ["x86_64"]
+  architectures    = ["arm64"]
 
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
 

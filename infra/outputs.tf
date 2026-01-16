@@ -57,10 +57,10 @@ output "cloudwatch_log_group_name" {
 
 output "lambda_errors_alarm_name" {
   description = "Name of the Lambda errors CloudWatch alarm"
-  value       = aws_cloudwatch_metric_alarm.lambda_errors.alarm_name
+  value       = aws_cloudwatch_metric_alarm.lambda_errors_critical.alarm_name
 }
 
 output "lambda_duration_alarm_name" {
   description = "Name of the Lambda duration CloudWatch alarm"
-  value       = aws_cloudwatch_metric_alarm.lambda_duration.alarm_name
+  value       = aws_cloudwatch_metric_alarm.lambda_duration_warning.alarm_name
 }

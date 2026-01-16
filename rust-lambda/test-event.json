@@ -1,0 +1,15 @@
+{
+  "Records": [
+    {
+      "ses": {
+        "mail": {
+          "messageId": "test-message-id-12345",
+          "source": "sender@example.com",
+          "destination": [
+            "contact@jimmillerdrums.com"
+          ]
+        }
+      }
+    }
+  ]
+}

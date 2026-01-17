@@ -1,32 +1,45 @@
-# OpenTofu
+# --- Infrastructure (OpenTofu) ---
 infra/.terraform/
-infra/.terraform.lock.hcl
 infra/*.tfstate
 infra/*.tfstate.*
 infra/*.tfvars
 infra/*.tfvars.json
 infra/opentofu.tfvars
+# NOTE: Do NOT ignore .terraform.lock.hcl
 
-# Lambda deployment packages
+# --- Rust (Lambda) ---
+rust-lambda/target/
+rust-lambda/debug/
+lambda-legacy-backup/target/
+
+# NOTE: Do NOT ignore Cargo.lock for binary/lambda projects
+# Ignore cargo-lambda specific metadata
+rust-lambda/.cargo-lambda/
+
+# --- Node.JS ---
+node_modules/
+build/Release
+
+# --- Lambda Deployment Artifacts ---
 *.zip
-lambda/node_modules/
-
-# Rust
-lambda/target/
-lambda/Cargo.lock
 bootstrap
+# Clean up leftover Node artifacts
+lambda-legacy-backup/node_modules/
 
-# IDE
+# --- AI & Agentic Tools (Kiro/Cursor/etc) ---
+.kiro/state/
+.kiro/logs/
+# Keep .kiro/steering/ tracked!
+
+# --- IDE & OS ---
 .vscode/
 .idea/
-
-# OS
 .DS_Store
 Thumbs.db
+*.swp
 
-# Logs
-*.log
-
-# Environment files
+# --- Environment & Logs ---
 .env
-.env.local
+.env.*
+!.env.example
+*.log

@@ -1,6 +1,8 @@
-const AWS = require('aws-sdk');
-const ses = new AWS.SES({ region: process.env.AWS_REGION });
-const s3 = new AWS.S3({ region: process.env.AWS_REGION });
+const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+
+const ses = new SESClient({ region: process.env.AWS_REGION });
+const s3 = new S3Client({ region: process.env.AWS_REGION });
 
 exports.handler = async (event) => {
     console.log('Received SES event:', JSON.stringify(event, null, 2));
@@ -22,12 +24,12 @@ exports.handler = async (event) => {
         const s3Key = `incoming/${messageId}`;
         console.log(`Retrieving email from S3: ${s3Key}`);
         
-        const s3Object = await s3.getObject({
+        const s3Response = await s3.send(new GetObjectCommand({
             Bucket: process.env.EMAIL_BUCKET,
             Key: s3Key
-        }).promise();
+        }));
         
-        const originalEmail = s3Object.Body.toString();
+        const originalEmail = await s3Response.Body.transformToString();
         console.log('Retrieved original email from S3');
         
         // Extract original email details
@@ -36,6 +38,22 @@ exports.handler = async (event) => {
         
         const fromMatch = originalEmail.match(/^From: (.*)$/m);
         const originalFrom = fromMatch ? fromMatch[1] : source;
+        
+        // Extract sender name and email from From header
+        let senderName = source;
+        let senderEmail = source;
+        const nameEmailMatch = originalFrom.match(/^"?([^"<]+)"?\s*<?([^>]+)>?$/);
+        if (nameEmailMatch) {
+            senderName = nameEmailMatch[1].trim();
+            senderEmail = nameEmailMatch[2].trim();
+        } else {
+            // Just email address, no name
+            const emailMatch = originalFrom.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+            if (emailMatch) {
+                senderEmail = emailMatch[1];
+                senderName = senderEmail.split('@')[0];
+            }
+        }
         
         // Extract email body and parse MIME content
         const bodyStart = originalEmail.indexOf('\r\n\r\n');
@@ -53,11 +71,11 @@ exports.handler = async (event) => {
         }
         
         const params = {
-            Source: 'jim@jimmillerdrums.com',
+            Source: `"${senderName} (via jimmillerdrums.com)" <jim@jimmillerdrums.com>`,
             Destination: {
                 ToAddresses: [forwardToEmail]
             },
-            ReplyToAddresses: [source],
+            ReplyToAddresses: [senderEmail],
             Message: {
                 Subject: {
                     Data: subject,
@@ -72,7 +90,7 @@ exports.handler = async (event) => {
             }
         };
         
-        const result = await ses.sendEmail(params).promise();
+        const result = await ses.send(new SendEmailCommand(params));
         console.log('Email forwarded successfully:', result.MessageId);
         
         return {

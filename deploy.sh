@@ -1,9 +1,21 @@
 #!/bin/bash
 
+# DEPRECATED: This script is for the old Node.js Lambda
+# Use deploy-rust.sh for the current Rust implementation
+
 # Email Infrastructure Deployment Script
 # This script helps manage the email infrastructure for jimmillerdrums.com
 
 set -e
+
+echo "⚠️  WARNING: This script is DEPRECATED"
+echo "Use deploy-rust.sh for the current Rust Lambda implementation"
+echo ""
+read -p "Continue with legacy script? (y/N) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+fi
 
 # Colors for output
 RED='\033[0;31m'

@@ -23,6 +23,8 @@ jobs:
           types: |
             feat
             fix
+            ci
+            infra
             chore
             docs
             style

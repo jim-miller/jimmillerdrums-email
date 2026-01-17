@@ -9,10 +9,16 @@ infra/opentofu.tfvars
 
 # --- Rust (Lambda) ---
 rust-lambda/target/
+rust-lambda/debug/
 lambda-legacy-backup/target/
+
 # NOTE: Do NOT ignore Cargo.lock for binary/lambda projects
 # Ignore cargo-lambda specific metadata
 rust-lambda/.cargo-lambda/
+
+# --- Node.JS ---
+node_modules/
+build/Release
 
 # --- Lambda Deployment Artifacts ---
 *.zip

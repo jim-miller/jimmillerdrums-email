@@ -41,19 +41,36 @@ resource "aws_s3_bucket_lifecycle_configuration" "email_storage" {
   bucket = aws_s3_bucket.email_storage.id
 
   rule {
-    id     = "email_lifecycle"
+    id     = "general_incoming_emails"
     status = "Enabled"
 
     filter {
-      prefix = ""
+      prefix = "${var.email_general_prefix}/"
     }
 
     expiration {
-      days = 90  # Delete emails after 90 days
+      days = 90
     }
 
     noncurrent_version_expiration {
       noncurrent_days = 30
+    }
+  }
+
+  rule {
+    id     = "reports_cleanup"
+    status = "Enabled"
+
+    filter {
+      prefix = "${var.email_reports_prefix}/"
+    }
+
+    expiration {
+      days = 30
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 7
     }
   }
 }

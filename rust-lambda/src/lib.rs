@@ -42,10 +42,14 @@ pub async fn process_ses_event(
     let email_bucket = std::env::var("EMAIL_BUCKET")
         .map_err(|_| lambda_runtime::Error::from("EMAIL_BUCKET not set"))?;
 
+    let incoming_email_prefix = std::env::var("INCOMING_PREFIX")
+        .map_err(|_| lambda_runtime::Error::from("INCOMING_PREFIX not set"))?;
+
     let forward_to = EmailAddress::try_from(forward_to_email)?;
 
     let request = ForwardEmailRequest {
         bucket: email_bucket,
+        incoming_path: incoming_email_prefix,
         message_id,
         original_from,
         forward_to,

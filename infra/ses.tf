@@ -48,5 +48,5 @@ resource "aws_route53_record" "dmarc" {
   name    = "_dmarc"
   type    = "TXT"
   ttl     = 600
-  records = ["v=DMARC1; p=none; rua=mailto:jim@jimmillerdrums.com; ruf=mailto:jim@jimmillerdrums.com; sp=none; adkim=r; aspf=r"]
+  records = ["v=DMARC1; p=none; rua=mailto:dmarc@jimmillerdrums.com; adkim=r; aspf=r"]
 }

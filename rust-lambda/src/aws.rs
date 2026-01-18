@@ -105,6 +105,7 @@ pub async fn send_email_via_ses(
 
 pub struct ForwardEmailRequest {
     pub bucket: String,
+    pub incoming_path: String,
     pub message_id: MessageId,
     pub original_from: String,
     pub forward_to: EmailAddress,
@@ -114,7 +115,7 @@ pub async fn forward_email(
     context: &AppContext,
     request: ForwardEmailRequest,
 ) -> Result<String, AwsError> {
-    let s3_key = S3Key::try_from(format!("incoming/{}", request.message_id))?;
+    let s3_key = S3Key::try_from(format!("{}/{}", request.incoming_path, request.message_id))?;
 
     let email_bytes = retrieve_email_from_s3(&context.s3_client, &request.bucket, &s3_key).await?;
 
@@ -122,7 +123,7 @@ pub async fn forward_email(
 
     let sender_name = extract_sender_name(&request.original_from);
     let from_address = format!(
-        "\"{}\" (via jimmillerdrums.com) <jim@jimmillerdrums.com>",
+        "\"{}\" (via jimmillerdrums.com) <forwarder@jimmillerdrums.com>",
         sender_name
     );
 

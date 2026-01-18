@@ -16,6 +16,18 @@ variable "environment" {
   default     = "prod"
 }
 
+variable "email_general_prefix" {
+  description = "Bucket prefix to store general email (human-readable)"
+  type        = string
+  default     = "incoming"
+}
+
+variable "email_reports_prefix" {
+  description = "Bucket prefix to store email reports (e.g. dmarc)"
+  type        = string
+  default     = "reports"
+}
+
 variable "forward_to_email" {
   description = "Gmail address to forward emails to"
   type        = string

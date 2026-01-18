@@ -2,11 +2,12 @@
 
 **Project**: Custom Domain Email Setup for jimmillerdrums.com  
 **Completed**: January 12, 2026  
+**Updated**: January 18, 2026 (Rust Migration + DMARC Support)  
 **Technology Stack**: AWS SES + Lambda + S3 + OpenTofu + Rust  
 
 ## 🎉 Project Completion Status: **SUCCESS**
 
-All 6 planned tasks completed successfully, resulting in a production-ready email infrastructure.
+All 6 planned tasks completed successfully, plus additional improvements for DMARC handling and comprehensive testing.
 
 ## ✅ Accomplished Tasks
 
@@ -25,26 +26,50 @@ All 6 planned tasks completed successfully, resulting in a production-ready emai
 ### 3. **S3 Bucket and IAM Policies for Email Storage**
 - ✅ **S3 Bucket**: `jimmillerdrums-email-emails-77808605` with AES256 encryption
 - ✅ **Security**: Private bucket with no public access
-- ✅ **Lifecycle**: Automatic email deletion after 90 days
+- ✅ **Lifecycle**: Prefix-based lifecycle rules (90 days for incoming/, 30 days for reports/dmarc/)
 - ✅ **IAM Policies**: Least-privilege access for Lambda and SES
 
 ### 4. **Rust Lambda Function for Smart Email Routing**
-- ✅ **Language**: Rust with AWS SDK integration
-- ✅ **Architecture**: Newtype patterns and proper error handling
-- ✅ **Performance**: 256MB memory, 60-second timeout
-- ✅ **Routing Logic**: Smart forwarding based on recipient address
+- ✅ **Language**: Rust with AWS SDK integration and ARM64 architecture
+- ✅ **Architecture**: Newtype patterns, clean configuration, and proper error handling
+- ✅ **Performance**: 256MB memory, 60-second timeout, optimized for cold starts
+- ✅ **Routing Logic**: Smart forwarding with configurable S3 prefixes
+- ✅ **Testing**: 23 comprehensive tests with AWS SDK mocking
 
 ### 5. **SES Receipt Rules and Component Integration**
 - ✅ **Receipt Rule Set**: `jimmillerdrums-email-rules` (Active)
+- ✅ **DMARC Support**: Separate rule for dmarc@ emails with reports/dmarc/ prefix
 - ✅ **Email Flow**: SES → S3 Storage → Lambda Processing
 - ✅ **Spam Protection**: Built-in SES scanning enabled
 - ✅ **Integration**: All components working together seamlessly
 
 ### 6. **Monitoring and Gmail Integration Setup**
 - ✅ **CloudWatch Logs**: 14-day retention for Lambda function
-- ✅ **Alarms**: Error and duration monitoring configured
+- ✅ **Alarms**: 10 severity-based alarms (P1-Critical, P2-Warning, P3-Info)
 - ✅ **Documentation**: Complete Gmail SMTP integration guide
 - ✅ **Management Tools**: Deployment script with status checking
+
+## 🆕 Recent Improvements (January 2026)
+
+### **DMARC Report Handling**
+- ✅ **Separate Processing**: DMARC reports stored in `reports/dmarc/` prefix
+- ✅ **Lifecycle Optimization**: 30-day retention for automated reports vs 90 days for regular emails
+- ✅ **Rule Ordering**: DMARC rule processed before general catch-all
+
+### **Configuration Architecture**
+- ✅ **Clean Config**: Environment variables loaded once at startup into `Config` struct
+- ✅ **Dependency Injection**: Configuration passed to handlers, not read from env vars
+- ✅ **Testability**: Easy to test with mock configurations, no global state manipulation
+
+### **Comprehensive Testing**
+- ✅ **AWS SDK Mocking**: Using `aws-smithy-mocks` for realistic AWS integration tests
+- ✅ **Test Categories**: Unit (9), AWS Integration (4), Config (2), Email Parsing (8)
+- ✅ **Error Scenarios**: S3 failures, SES throttling, configuration errors
+- ✅ **Parallel Execution**: Tests run independently without environment variable conflicts
+
+### **Updated Sender Identity**
+- ✅ **Professional Identity**: Changed from `jim@jimmillerdrums.com` to `forwarder@jimmillerdrums.com`
+- ✅ **Verified Identity**: Proper SES identity configuration for the forwarder address
 
 ## 🏗 Infrastructure Deployed
 

@@ -2,7 +2,7 @@
 
 ## Migration Summary
 
-Successfully migrated the JavaScript email forwarding Lambda function to Rust with significant improvements in type safety, performance, and maintainability.
+Successfully migrated the JavaScript email forwarding Lambda function to Rust with significant improvements in type safety, performance, maintainability, and testability.
 
 ## What Was Migrated
 
@@ -12,6 +12,7 @@ Successfully migrated the JavaScript email forwarding Lambda function to Rust wi
 - **Size**: ~2KB source code + node_modules
 - **Type Safety**: None (JavaScript)
 - **Error Handling**: Try-catch with string errors
+- **Configuration**: Environment variables read in business logic
 
 ### New Rust Implementation
 - **Runtime**: provided.al2023 (custom runtime)
@@ -19,18 +20,20 @@ Successfully migrated the JavaScript email forwarding Lambda function to Rust wi
 - **Size**: ~11MB optimized binary
 - **Type Safety**: Full compile-time type checking
 - **Error Handling**: Structured errors with `thiserror`
+- **Configuration**: Clean config struct with dependency injection
 
 ## Key Improvements
 
-### 1. Type Safety
+### 1. Type Safety & Configuration
 - **Newtype Pattern**: All domain types wrapped in validated newtypes
   - `EmailAddress`: Validates email format
   - `MessageId`: Non-empty string validation
   - `S3Key`: Path validation
   - `Subject`: Email subject
   - `EmailBody`: Email content
-- **Strict Event Types**: SES events fully typed (no `serde_json::Value`)
-- **Compile-Time Guarantees**: Invalid states unrepresentable
+- **Clean Configuration**: `Config` struct loaded once at startup
+- **Dependency Injection**: Configuration passed to handlers, not read from env vars
+- **Testable Design**: Easy to test with mock configurations
 
 ### 2. Performance Optimizations
 - **ARM64 Architecture**: 20-34% better price-performance vs x86_64
@@ -58,38 +61,60 @@ rust-lambda/
 ├── Cargo.toml              # Dependencies and build config
 ├── README.md               # Rust Lambda documentation
 ├── test-event.json         # Sample SES event for testing
-└── src/
-    ├── lib.rs              # Public API and handler
-    ├── main.rs             # Lambda runtime initialization
-    ├── domain.rs           # Domain types with Newtype pattern
-    ├── email.rs            # Email parsing service
-    └── aws.rs              # AWS S3 and SESv2 integration
+├── src/
+│   ├── lib.rs              # Public API and handler
+│   ├── main.rs             # Lambda runtime initialization
+│   ├── config.rs           # Configuration management
+│   ├── domain.rs           # Domain types with Newtype pattern
+│   ├── email.rs            # Email parsing service
+│   └── aws.rs              # AWS S3 and SESv2 integration
+└── tests/
+    ├── aws_integration_tests.rs  # AWS SDK mocking tests
+    ├── config_tests.rs           # Configuration tests
+    └── integration_tests.rs      # Email parsing tests
 ```
 
 ## Dependencies
 
 ```toml
+# Production
 lambda_runtime = "0.13"           # AWS Lambda runtime
 tokio = "1"                       # Async runtime
-aws-config = "1.1"                # AWS SDK configuration
-aws-sdk-sesv2 = "1.50"            # SES v2 SDK
-aws-sdk-s3 = "1.50"               # S3 SDK
+aws-config = "1.8"                # AWS SDK configuration
+aws-sdk-sesv2 = "1.110"           # SES v2 SDK
+aws-sdk-s3 = "1.119"              # S3 SDK
 serde = "1.0"                     # Serialization
 thiserror = "1.0"                 # Error handling
 tracing = "0.1"                   # Structured logging
 mailparse = "0.16"                # Email parsing
+
+# Testing
+aws-smithy-mocks = "0.2"          # AWS SDK mocking
+aws-smithy-types = "1.3"          # AWS types for testing
+aws-smithy-runtime-api = "1.10"   # AWS runtime API for testing
 ```
 
 ## Testing
 
-All unit tests passing:
+### Unit Tests (9 tests)
 - ✅ Email address validation
 - ✅ Message ID validation
 - ✅ Email parsing from raw MIME
 - ✅ Email address extraction from headers
 - ✅ Sender name extraction
+- ✅ Configuration creation and validation
 
-All integration tests passing:
+### AWS Integration Tests (4 tests)
+- ✅ Forward email with custom incoming path
+- ✅ Updated sender identity verification
+- ✅ S3 GetObject failure handling
+- ✅ SES SendEmail throttling handling
+
+### Configuration Tests (2 tests)
+- ✅ Config-based processing without environment variables
+- ✅ Custom incoming prefix in S3 key construction
+
+### Integration Tests (8 tests)
 - ✅ Simple email parsing end-to-end
 - ✅ Multipart email handling
 - ✅ Sender name extraction variations
@@ -98,8 +123,36 @@ All integration tests passing:
 - ✅ Quoted-printable encoding
 
 ```bash
-test result: ok. 15 passed; 0 failed; 0 ignored
+test result: ok. 23 passed; 0 failed; 0 ignored
 ```
+
+## Configuration Architecture
+
+### Clean Separation
+```rust
+// src/config.rs - Configuration loaded once at startup
+pub struct Config {
+    pub email_bucket: String,
+    pub incoming_prefix: String,
+    pub forward_to_email: String,
+}
+
+// src/main.rs - Config loaded in main()
+let config = Config::from_env()?;
+
+// src/lib.rs - Config injected as dependency
+pub async fn process_ses_event(
+    event: SesEvent,
+    context: &AppContext,
+    config: &Config,  // ← Clean dependency injection
+) -> Result<Value, lambda_runtime::Error>
+```
+
+### Testing Benefits
+- No global environment variable manipulation
+- Tests run in parallel (no `serial_test` needed)
+- Easy to test different configurations
+- Clear separation of concerns
 
 ## Deployment
 
@@ -119,6 +172,19 @@ cargo lambda build --release --arm64
 - **Architecture**: `x86_64` → `arm64`
 - **Source**: `lambda/index.js` → `rust-lambda/target/lambda/email-processor/bootstrap`
 
+## Branch-Specific Features (DMARC Handling)
+
+### New Configuration Support
+- **Configurable S3 Prefix**: `INCOMING_PREFIX` environment variable
+- **Updated Sender Identity**: `forwarder@jimmillerdrums.com`
+- **Prefix-based S3 Keys**: `{incoming_prefix}/{message_id}`
+
+### Test Coverage for New Features
+- ✅ Custom incoming path functionality
+- ✅ Environment variable parsing
+- ✅ Updated sender identity verification
+- ✅ AWS service failure scenarios
+
 ## Success Checklist
 
 - ✅ SES Client initialized outside handler
@@ -131,6 +197,8 @@ cargo lambda build --release --arm64
 - ✅ Tracing replaces console.log
 - ✅ ARM64 architecture for cost optimization
 - ✅ LTO and binary stripping enabled
+- ✅ Clean configuration architecture
+- ✅ Comprehensive test coverage with AWS mocking
 
 ## Performance Expectations
 
@@ -154,58 +222,6 @@ cargo lambda build --release --arm64
 - **Lower memory usage**: Potential to reduce memory allocation
 - **Expected savings**: 20-30% on Lambda costs
 
-## Next Steps
-
-1. **Deploy to Production**
-   ```bash
-   ./deploy-rust.sh
-   ```
-
-2. **Monitor Performance**
-   - Check CloudWatch logs for cold start times
-   - Monitor memory usage
-   - Verify email forwarding works correctly
-
-3. **Gradual Rollout** (Optional)
-   - Deploy to staging environment first
-   - Test with real emails
-   - Monitor for 24-48 hours
-   - Switch production traffic
-
-4. **Cleanup** (After Verification)
-   - Remove old JavaScript Lambda code
-   - Update documentation
-   - Archive old deployment scripts
-
-## Rollback Plan
-
-If issues arise, rollback is simple:
-
-1. Revert `infra/lambda.tf` to use JavaScript version
-2. Run `tofu apply` in infra directory
-3. Old Lambda will be restored
-
-## Documentation
-
-- **Rust Lambda README**: `rust-lambda/README.md`
-- **Test Event**: `rust-lambda/test-event.json`
-- **Deployment Script**: `deploy-rust.sh`
-- **Infrastructure**: `infra/lambda.tf`
-
-## Compliance with Standards
-
-### Global Standards (~/.kiro/steering)
-- ✅ **lambda-standards.md**: Static client initialization in main()
-- ✅ **library-standards.md**: Newtype pattern for domain types
-- ✅ **code-conventions.md**: Idiomatic Rust with iterators
-- ✅ **security-policies.md**: No unsafe, no unwraps
-- ✅ **testing-standards.md**: Unit tests in same file
-
-### Project Standards (.kiro/steering)
-- ✅ **lambda-standards.md**: AWS SDK v3 patterns (Rust equivalent)
-- ✅ **architecture.md**: Maintains same email flow
-- ✅ **tech.md**: Uses AWS services correctly
-
 ## Conclusion
 
 The migration is complete and ready for deployment. The Rust implementation provides:
@@ -214,5 +230,7 @@ The migration is complete and ready for deployment. The Rust implementation prov
 - **Cost Savings**: 20-30% reduction in Lambda costs
 - **Maintainability**: Clear domain types and error handling
 - **Safety**: No unsafe code, proper error propagation
+- **Testability**: Clean architecture with dependency injection
+- **Comprehensive Testing**: 23 tests covering all functionality
 
 Deploy with confidence! 🚀

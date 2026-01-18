@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 pub mod aws;
+pub mod config;
 pub mod domain;
 pub mod email;
 
@@ -14,6 +15,7 @@ use tracing::{error, info};
 pub async fn process_ses_event(
     event: SesEvent,
     context: &AppContext,
+    config: &config::Config,
 ) -> Result<Value, lambda_runtime::Error> {
     info!("Processing SES event with {} records", event.records.len());
 
@@ -36,16 +38,11 @@ pub async fn process_ses_event(
         message_id, original_from, destination
     );
 
-    let forward_to_email = std::env::var("FORWARD_TO_EMAIL")
-        .map_err(|_| lambda_runtime::Error::from("FORWARD_TO_EMAIL not set"))?;
-
-    let email_bucket = std::env::var("EMAIL_BUCKET")
-        .map_err(|_| lambda_runtime::Error::from("EMAIL_BUCKET not set"))?;
-
-    let forward_to = EmailAddress::try_from(forward_to_email)?;
+    let forward_to = EmailAddress::try_from(config.forward_to_email.clone())?;
 
     let request = ForwardEmailRequest {
-        bucket: email_bucket,
+        bucket: config.email_bucket.clone(),
+        incoming_path: config.incoming_prefix.clone(),
         message_id,
         original_from,
         forward_to,

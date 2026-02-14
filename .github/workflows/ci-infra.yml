@@ -46,7 +46,10 @@ jobs:
         env:
           # Mapping the GitHub Environment Variable to a Terraform Variable
           TF_VAR_forward_to_email: ${{ secrets.FORWARD_TO_EMAIL }}
-        run: tofu plan -no-color -out=tfplan
+        run: |
+          tofu plan -no-color -out=tfplan \
+            -exclude=aws_lambda_function.email_processor \
+            -exclude=data.archive_file.lambda_zip
 
       - name: Post Plan to PR
         uses: actions/github-script@v7

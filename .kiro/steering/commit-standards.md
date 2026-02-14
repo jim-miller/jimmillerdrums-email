@@ -61,3 +61,12 @@ just build       # Runs cargo lambda build --release
 just test        # Runs cargo test
 just infra-plan  # Runs tofu plan
 ```
+
+## 6. 🛠 Operational Hygiene & Maintenance
+
+- **[ ] System Notifications:** Lambda code explicitly ignores `AMAZON_SES_SETUP_NOTIFICATION` to prevent log noise or execution failures.
+- **[ ] Large Object Handling:** Verified that the Lambda can handle DMARC `.gz` files without timing out or hitting memory limits (256MB).
+- **[ ] Artifact Management:** Verified that the `justfile` is updated whenever new infrastructure components (like a new S3 bucket) are added.
+- **[ ] Log Rotation:** Verified that CloudWatch log retention is set (e.g., 14 days) in `monitoring.tf` to control costs.
+- **[ ] Housekeeping:** Ran `just clean-setup` after verifying the initial SES-to-S3 handshake.
+

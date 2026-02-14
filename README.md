@@ -61,19 +61,30 @@ jimmillerdrums-email/
 ### Quick Setup
 
 1. **Install cargo-lambda**:
+
    ```bash
    cargo install cargo-lambda
    ```
 
-2. **Configure variables** (optional, defaults to miller.jimd@gmail.com):
+2. **Configure variables** (optional, defaults to <miller.jimd@gmail.com>):
+
    ```bash
    export TF_VAR_forward_to_email="your-email@gmail.com"
    ```
 
-3. **Build & Deploy**:
+3. **Deployment**:
+
+   **Automatic (Recommended):**
+   - Push to `main` branch triggers automatic deployment via GitHub Actions
+   - Requires GitHub Secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `FORWARD_TO_EMAIL`
+
+   **Manual:**
+
    ```bash
    ./deploy-rust.sh
    ```
+
+   Or trigger manually via GitHub Actions -> Deploy to Production -> Run workflow
 
 ---
 
@@ -92,16 +103,17 @@ The core logic is written in Rust for high performance and minimal cold start la
 
 ### Performance Metrics
 
-| Metric | Rust (ARM64) | Node.js (x86_64) | Improvement |
-|--------|--------------|------------------|-------------|
-| Cold Start | 662ms | ~1000ms | 34% faster |
-| Warm Execution | 183ms | 50-100ms | Comparable |
-| Memory Used | 31MB | ~150MB | 79% less |
-| Cost | ~$1.50/mo | ~$2.50/mo | 40% cheaper |
+| Metric         | Rust (ARM64) | Node.js (x86_64) | Improvement |
+| -------------- | ------------ | ---------------- | ----------- |
+| Cold Start     | 662ms        | ~1000ms          | 34% faster  |
+| Warm Execution | 183ms        | 50-100ms         | Comparable  |
+| Memory Used    | 31MB         | ~150MB           | 79% less    |
+| Cost           | ~$1.50/mo    | ~$2.50/mo        | 40% cheaper |
 
 ### Build Profile
 
 Optimized for size and execution speed:
+
 - `lto = true` (Link Time Optimization)
 - `codegen-units = 1` (Better optimization)
 - `panic = "abort"` (Smaller binary)
@@ -121,6 +133,9 @@ cargo test
 
 # Deploy everything
 ./deploy-rust.sh
+
+# Or deploy via GitHub Actions (manual trigger)
+# Go to: Actions -> Deploy to Production -> Run workflow
 
 # View logs
 aws logs tail /aws/lambda/jimmillerdrums-email-processor --follow
@@ -175,22 +190,27 @@ See [docs/MONITORING.md](docs/MONITORING.md) for details.
 ## 🔧 Troubleshooting
 
 ### Forwarding Failures
+
 Check CloudWatch logs:
+
 ```bash
 aws logs tail /aws/lambda/jimmillerdrums-email-processor --since 1h
 ```
 
 Common issues:
+
 - SES Sandbox mode (verify recipient email)
 - Missing S3 permissions
 - Invalid email format
 
 ### Performance Issues
+
 - Verify ARM64 build: `cargo lambda build --release --arm64`
 - Check memory usage in CloudWatch metrics
 - Review Lambda duration alarms
 
 ### DNS Issues
+
 - Verify MX records point to SES inbound endpoint
 - Check DKIM records are published
 - Confirm SPF record includes SES
@@ -209,15 +229,15 @@ Common issues:
 
 ## 💰 Cost Breakdown
 
-| Service | Monthly Cost |
-|---------|--------------|
-| Lambda (ARM64) | ~$1.40 |
-| S3 Storage | ~$0.10 |
-| SES (sending) | ~$0.10 |
-| CloudWatch | ~$1.00 |
-| **Total** | **~$2.60/month** |
+| Service        | Monthly Cost     |
+| -------------- | ---------------- |
+| Lambda (ARM64) | ~$1.40           |
+| S3 Storage     | ~$0.10           |
+| SES (sending)  | ~$0.10           |
+| CloudWatch     | ~$1.00           |
+| **Total**      | **~$2.60/month** |
 
-*Based on ~50 emails/month. Scales linearly with volume.*
+_Based on ~50 emails/month. Scales linearly with volume._
 
 ---
 
@@ -229,7 +249,7 @@ Common issues:
 ✅ **100% type safety** at compile time  
 ✅ **Zero production errors** since deployment  
 ✅ **15 comprehensive tests** (unit + integration)  
-✅ **Production-ready monitoring** with 10 alarms  
+✅ **Production-ready monitoring** with 10 alarms
 
 ---
 

@@ -1,0 +1,70 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cargo Lambda
+        run: pip install cargo-lambda
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust-lambda
+
+      - name: Build Lambda (ARM64)
+        working-directory: ./rust-lambda
+        run: cargo lambda build --release --arm64
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: OpenTofu Init & Apply
+        working-directory: ./infra
+        env:
+          TF_VAR_forward_to_email: ${{ secrets.FORWARD_TO_EMAIL }}
+        run: |
+          tofu init
+          tofu apply --auto-approve
+
+      - name: Get Lambda Function Name
+        id: lambda
+        working-directory: ./infra
+        run: |
+          echo "FUNCTION_NAME=$(tofu output -raw lambda_function_name)" >> $GITHUB_OUTPUT
+
+      - name: Verify Deployment
+        run: |
+          aws lambda get-function ${{ steps.lambda.outputs.FUNCTION_NAME }} \
+            --region us-east-1 \
+            --query '{Name:FunctionName,Runtime:Runtime,Memory:MemorySize,Timeout:Timeout,LastModified:LastModified}' \
+            --output table
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment successful!"
+          echo "Lambda Function: ${{ steps.lambda.outputs.FUNCTION_NAME }}"
+          echo "Region: us-east-1"

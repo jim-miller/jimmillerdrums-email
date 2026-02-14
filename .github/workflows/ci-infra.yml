@@ -1,0 +1,65 @@
+name: "Infrastructure CI"
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - '.github/workflows/ci-infra.yml'
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+  pull-requests: write # Allows posting the plan to the PR comment
+
+jobs:
+  plan:
+    name: OpenTofu Plan
+    runs-on: ubuntu-latest
+    environment: staging # Matches the GitHub Environment where your secrets live
+    defaults:
+      run:
+        working-directory: ./infra
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1 # Adjust to your region
+
+      - name: OpenTofu Format Check
+        run: tofu fmt -check
+
+      - name: OpenTofu Init
+        run: tofu init
+
+      - name: OpenTofu Validate
+        run: tofu validate
+
+      - name: OpenTofu Plan
+        id: plan
+        env:
+          # Mapping the GitHub Environment Variable to a Terraform Variable
+          TF_VAR_forward_to_email: ${{ secrets.FORWARD_TO_EMAIL }}
+        run: tofu plan -no-color -out=tfplan
+        
+      - name: Post Plan to PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `#### OpenTofu Plan 📖
+            Status: ${{ job.status }}
+            [View Full Logs](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

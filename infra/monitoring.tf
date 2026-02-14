@@ -2,7 +2,7 @@
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.email_processor.function_name}"
   retention_in_days = 14
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -21,19 +21,19 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors_critical" {
   evaluation_periods  = 2
   threshold           = 0
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Errors"
   namespace   = "AWS/Lambda"
   period      = 300
   statistic   = "Sum"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.email_processor.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.critical_alarms.arn]
   ok_actions    = [aws_sns_topic.critical_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -49,15 +49,15 @@ resource "aws_cloudwatch_metric_alarm" "ses_reputation_bounce_rate" {
   evaluation_periods  = 1
   threshold           = 0.05
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Reputation.BounceRate"
   namespace   = "AWS/SES"
   period      = 900
   statistic   = "Average"
-  
+
   alarm_actions = [aws_sns_topic.critical_alarms.arn]
   ok_actions    = [aws_sns_topic.critical_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -73,15 +73,15 @@ resource "aws_cloudwatch_metric_alarm" "ses_reputation_complaint_rate" {
   evaluation_periods  = 1
   threshold           = 0.001
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Reputation.ComplaintRate"
   namespace   = "AWS/SES"
   period      = 900
   statistic   = "Average"
-  
+
   alarm_actions = [aws_sns_topic.critical_alarms.arn]
   ok_actions    = [aws_sns_topic.critical_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -97,19 +97,19 @@ resource "aws_cloudwatch_metric_alarm" "lambda_throttles" {
   evaluation_periods  = 2
   threshold           = 0
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Throttles"
   namespace   = "AWS/Lambda"
   period      = 300
   statistic   = "Sum"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.email_processor.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.critical_alarms.arn]
   ok_actions    = [aws_sns_topic.critical_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -130,19 +130,19 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration_warning" {
   datapoints_to_alarm = 2
   threshold           = 10000
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Duration"
   namespace   = "AWS/Lambda"
   period      = 300
   statistic   = "Average"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.email_processor.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.warning_alarms.arn]
   ok_actions    = [aws_sns_topic.warning_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -158,15 +158,15 @@ resource "aws_cloudwatch_metric_alarm" "ses_send_failures" {
   evaluation_periods  = 2
   threshold           = 5
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Send"
   namespace   = "AWS/SES"
   period      = 900
   statistic   = "Sum"
-  
+
   alarm_actions = [aws_sns_topic.warning_alarms.arn]
   ok_actions    = [aws_sns_topic.warning_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -182,19 +182,19 @@ resource "aws_cloudwatch_metric_alarm" "lambda_concurrent_executions" {
   evaluation_periods  = 2
   threshold           = 5
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "ConcurrentExecutions"
   namespace   = "AWS/Lambda"
   period      = 300
   statistic   = "Maximum"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.email_processor.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.warning_alarms.arn]
   ok_actions    = [aws_sns_topic.warning_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -214,14 +214,14 @@ resource "aws_cloudwatch_metric_alarm" "ses_daily_volume_high" {
   evaluation_periods  = 1
   threshold           = 100
   treat_missing_data  = "notBreaching"
-  
+
   metric_name = "Send"
   namespace   = "AWS/SES"
   period      = 86400
   statistic   = "Sum"
-  
+
   alarm_actions = [aws_sns_topic.info_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -237,18 +237,18 @@ resource "aws_cloudwatch_metric_alarm" "lambda_invocations_low" {
   evaluation_periods  = 1
   threshold           = 1
   treat_missing_data  = "breaching"
-  
+
   metric_name = "Invocations"
   namespace   = "AWS/Lambda"
   period      = 604800
   statistic   = "Sum"
-  
+
   dimensions = {
     FunctionName = aws_lambda_function.email_processor.function_name
   }
-  
+
   alarm_actions = [aws_sns_topic.info_alarms.arn]
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name

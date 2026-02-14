@@ -1,8 +1,8 @@
 # SNS Topics for Alarm Notifications by Severity
 resource "aws_sns_topic" "critical_alarms" {
-  name              = "${var.project_name}-critical-alarms"
-  display_name      = "[P1-CRITICAL] ${var.project_name} Email System"
-  
+  name         = "${var.project_name}-critical-alarms"
+  display_name = "[P1-CRITICAL] ${var.project_name} Email System"
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -12,9 +12,9 @@ resource "aws_sns_topic" "critical_alarms" {
 }
 
 resource "aws_sns_topic" "warning_alarms" {
-  name              = "${var.project_name}-warning-alarms"
-  display_name      = "[P2-WARNING] ${var.project_name} Email System"
-  
+  name         = "${var.project_name}-warning-alarms"
+  display_name = "[P2-WARNING] ${var.project_name} Email System"
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -24,9 +24,9 @@ resource "aws_sns_topic" "warning_alarms" {
 }
 
 resource "aws_sns_topic" "info_alarms" {
-  name              = "${var.project_name}-info-alarms"
-  display_name      = "[P3-INFO] ${var.project_name} Email System"
-  
+  name         = "${var.project_name}-info-alarms"
+  display_name = "[P3-INFO] ${var.project_name} Email System"
+
   tags = {
     Environment = var.environment
     Project     = var.project_name

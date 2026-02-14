@@ -31,17 +31,17 @@ resource "aws_iam_user_policy" "ses_smtp_policy" {
 
 # Output SMTP credentials (sensitive)
 output "ses_smtp_username" {
-  value = aws_iam_access_key.ses_smtp_key.id
+  value       = aws_iam_access_key.ses_smtp_key.id
   description = "SMTP username for Gmail configuration"
 }
 
 output "ses_smtp_password" {
-  value = aws_iam_access_key.ses_smtp_key.ses_smtp_password_v4
-  sensitive = true
+  value       = aws_iam_access_key.ses_smtp_key.ses_smtp_password_v4
+  sensitive   = true
   description = "SMTP password for Gmail configuration (sensitive)"
 }
 
 output "ses_smtp_server" {
-  value = "email-smtp.us-east-1.amazonaws.com"
+  value       = "email-smtp.us-east-1.amazonaws.com"
   description = "SES SMTP server for Gmail configuration"
 }

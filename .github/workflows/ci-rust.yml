@@ -1,0 +1,51 @@
+name: "Rust CI"
+
+on:
+  pull_request:
+    paths:
+      - "rust-lambda/**"
+      - ".github/workflows/ci-rust.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "rust-lambda/**"
+
+jobs:
+  test:
+    name: Lint & Test (ARM64)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./rust-lambda
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Install Cargo Lambda
+        run: pip install cargo-lambda
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust-lambda
+
+      - name: Format Check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy Lint
+        run: cargo clippy -- -D warnings
+
+      - name: Unit & Integration Tests
+        run: cargo test
+
+      - name: Build Check (ARM64)
+        # This ensures the code actually compiles for the target Lambda architecture
+        run: cargo lambda build --release --arm64
+

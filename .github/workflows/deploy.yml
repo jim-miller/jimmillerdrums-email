@@ -58,9 +58,9 @@ jobs:
 
       - name: Verify Deployment
         run: |
-          aws lambda get-function ${{ steps.lambda.outputs.FUNCTION_NAME }} \
+          aws lambda get-function --function-name ${{ steps.lambda.outputs.FUNCTION_NAME }} \
             --region us-east-1 \
-            --query '{Name:FunctionName,Runtime:Runtime,Memory:MemorySize,Timeout:Timeout,LastModified:LastModified}' \
+            --query 'Configuration|{Name:FunctionName,Runtime:Runtime,Memory:MemorySize,Timeout:Timeout,LastModified:LastModified}' \
             --output table
 
       - name: Deployment Summary

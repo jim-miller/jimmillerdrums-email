@@ -2,7 +2,9 @@ use aws_sdk_s3::operation::get_object::GetObjectOutput;
 use aws_sdk_sesv2::operation::send_email::SendEmailOutput;
 use aws_smithy_mocks::{mock, mock_client, Rule, RuleMode};
 use aws_smithy_types::body::SdkBody;
-use email_processor::{forward_email, AppContext, EmailAddress, ForwardEmailRequest, MessageId};
+use email_processor::{
+    forward_email, AppContext, Config, EmailAddress, ForwardEmailRequest, MessageId,
+};
 
 mod mocks {
     use super::*;
@@ -62,15 +64,20 @@ async fn test_forward_email_with_custom_incoming_path() {
         ses_client,
     };
 
+    let config = Config::new(
+        "test-bucket".to_string(),
+        "custom/prefix".to_string(),
+        "recipient@example.com".to_string(),
+    );
+
     let request = ForwardEmailRequest {
         bucket: "test-bucket".to_string(),
         incoming_path: "custom/prefix".to_string(),
         message_id: MessageId::try_from("test-message-123".to_string()).unwrap(),
-        original_from: "sender@example.com".to_string(),
         forward_to: EmailAddress::try_from("recipient@example.com".to_string()).unwrap(),
     };
 
-    let result = forward_email(&context, request).await;
+    let result = forward_email(&context, request, &config).await;
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "test-message-id-123");
 }
@@ -90,15 +97,20 @@ async fn test_forward_email_with_updated_sender_identity() {
         ses_client,
     };
 
+    let config = Config::new(
+        "test-bucket".to_string(),
+        "incoming".to_string(),
+        "recipient@example.com".to_string(),
+    );
+
     let request = ForwardEmailRequest {
         bucket: "test-bucket".to_string(),
         incoming_path: "incoming".to_string(),
         message_id: MessageId::try_from("test-message-123".to_string()).unwrap(),
-        original_from: "John Doe <john@example.com>".to_string(),
         forward_to: EmailAddress::try_from("recipient@example.com".to_string()).unwrap(),
     };
 
-    let result = forward_email(&context, request).await;
+    let result = forward_email(&context, request, &config).await;
     assert!(result.is_ok());
 
     // The test verifies that forwarder@jimmillerdrums.com is used as sender
@@ -118,15 +130,20 @@ async fn test_s3_get_object_failure() {
         ses_client,
     };
 
+    let config = Config::new(
+        "test-bucket".to_string(),
+        "incoming".to_string(),
+        "recipient@example.com".to_string(),
+    );
+
     let request = ForwardEmailRequest {
         bucket: "test-bucket".to_string(),
         incoming_path: "incoming".to_string(),
         message_id: MessageId::try_from("nonexistent-message".to_string()).unwrap(),
-        original_from: "sender@example.com".to_string(),
         forward_to: EmailAddress::try_from("recipient@example.com".to_string()).unwrap(),
     };
 
-    let result = forward_email(&context, request).await;
+    let result = forward_email(&context, request, &config).await;
     assert!(result.is_err());
 }
 
@@ -144,14 +161,19 @@ async fn test_ses_send_email_failure() {
         ses_client,
     };
 
+    let config = Config::new(
+        "test-bucket".to_string(),
+        "incoming".to_string(),
+        "recipient@example.com".to_string(),
+    );
+
     let request = ForwardEmailRequest {
         bucket: "test-bucket".to_string(),
         incoming_path: "incoming".to_string(),
         message_id: MessageId::try_from("test-message-123".to_string()).unwrap(),
-        original_from: "sender@example.com".to_string(),
         forward_to: EmailAddress::try_from("recipient@example.com".to_string()).unwrap(),
     };
 
-    let result = forward_email(&context, request).await;
+    let result = forward_email(&context, request, &config).await;
     assert!(result.is_err());
 }

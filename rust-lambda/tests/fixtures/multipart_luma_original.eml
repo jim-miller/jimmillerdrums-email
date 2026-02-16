@@ -1,0 +1,69 @@
+Return-Path: <test-message-id@amazonses.example.com>
+Received: from smtp-out.example.com (smtp-out.example.com [192.0.2.2])
+ by inbound-smtp.us-east-1.amazonaws.com with SMTP id test-receipt-id
+ for recipient@example.com;
+ Sun, 08 Feb 2026 04:00:25 +0000 (UTC)
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+Received-SPF: pass (spfCheck: domain of example.com designates 192.0.2.2 as permitted sender) client-ip=192.0.2.2; envelope-from=test-message-id@amazonses.example.com; helo=smtp-out.example.com;
+Authentication-Results: amazonses.com;
+ spf=pass (spfCheck: domain of example.com designates 192.0.2.2 as permitted sender) client-ip=192.0.2.2; envelope-from=test-message-id@amazonses.example.com; helo=smtp-out.example.com;
+ dkim=pass header.i=@example.com;
+ dkim=pass header.i=@amazonses.com;
+ dmarc=pass header.from=example.com;
+X-SES-RECEIPT: TEST_RECEIPT_TOKEN_REDACTED
+X-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=TEST_SIGNATURE_REDACTED; c=relaxed/simple; s=test; d=amazonses.com; t=1770523226; v=1; bh=TEST_HASH; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;
+From: Test Organization <sender@example.com>
+To: recipient@example.com
+Reply-To: Test Organization <replyto@example.com>
+Subject: You are invited to Test Event
+Message-ID: <test-message-id@example.com>
+Date: Sun, 8 Feb 2026 04:00:24 +0000
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="--_NmP-8f26e3424be3daad-Part_1"
+Feedback-ID: ::1.us-west-2.TEST_FEEDBACK_ID:AmazonSES
+X-SES-Outgoing: 2026.02.08-192.0.2.2
+
+----_NmP-8f26e3424be3daad-Part_1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+You=E2=80=99re invited to
+Test Event
+Thursday, February 26 7:00 =
+PM - 9:00 PM EST
+Location: In Person
+
+Hey all, Registration is now open for=
+ the first Test Organization session on Thursday, February 26th! Link to the event: example.com/event Please take a look for =
+details on the format. Slots are limited by =
+instrument to ensure a balanced ensemble, so I recommend signing up =
+whenever possible. I=E2=80=99m really looking forward to getting this =
+started! If you have any questions, =
+please let me know at replyto@example.com. Best, Test Organizer
+Accept Invite: https://example.com/invite
+View Event: https://example.=
+com/event
+
+Can=E2=80=99t make it? Decline the invite [https://example.=
+com/decline] to stop receiving emails about this event.
+
+Sent using https://example.com
+----_NmP-8f26e3424be3daad-Part_1
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><meta name=3D"viewport" content=3D"width=3Ddevice-width, initia=
+l-scale=3D1" /><title></title><meta http-equiv=3D"Content-Type" content=3D"tex=
+t/html; charset=3DUTF-8" /><style type=3D"text/css">
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          table, td {
+            border-collapse: collapse;
+          }
+        </style></head><body><table><tr><td><p>You're invited to Test Event</p><p>Thursday, February 26 7:00 PM - 9:00 PM EST</p><p>Location: In Person</p><p>Hey all, Registration is now open for the first Test Organization session on Thursday, February 26th! Link to the event: <a href=3D"https://example.com/event">example.com/event</a></p><p>Please take a look for details on the format. Slots are limited by instrument to ensure a balanced ensemble, so I recommend signing up whenever possible.</p><p>If you have any questions, please let me know at <a href=3D"mailto:replyto@example.com">replyto@example.com</a>.</p><p>Best, Test Organizer</p><p><a href=3D"https://example.com/invite">Accept Invite</a></p><p><a href=3D"https://example.com/event">View Event</a></p><p>Can't make it? <a href=3D"https://example.com/decline">Decline the invite</a> to stop receiving emails about this event.</p><p>Sent using <a href=3D"https://example.com">https://example.com</a></p></td></tr></table></body></html>
+
+----_NmP-8f26e3424be3daad-Part_1--

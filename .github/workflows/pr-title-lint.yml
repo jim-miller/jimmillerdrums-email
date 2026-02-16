@@ -24,6 +24,7 @@ jobs:
             feat
             fix
             ci
+            build
             infra
             chore
             docs

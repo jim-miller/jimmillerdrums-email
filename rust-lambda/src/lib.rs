@@ -4,10 +4,13 @@ pub mod aws;
 pub mod config;
 pub mod domain;
 pub mod email;
+pub mod mime;
 
 pub use aws::*;
+pub use config::Config;
 pub use domain::*;
 pub use email::*;
+pub use mime::*;
 
 use serde_json::{json, Value};
 use tracing::{error, info};
@@ -25,7 +28,6 @@ pub async fn process_ses_event(
         .ok_or_else(|| lambda_runtime::Error::from("No records in SES event"))?;
 
     let message_id = MessageId::try_from(record.ses.mail.message_id.clone())?;
-    let original_from = record.ses.mail.source.clone();
     let destination = record
         .ses
         .mail
@@ -33,12 +35,8 @@ pub async fn process_ses_event(
         .first()
         .ok_or_else(|| lambda_runtime::Error::from("No destination in SES event"))?;
 
-    info!(
-        "Processing email: {} from {} to {}",
-        message_id, original_from, destination
-    );
+    info!("Processing email: {} to {}", message_id, destination);
 
-    // Check if this is a report email that should not be forwarded
     if is_report_email(destination) {
         info!("Skipping forwarding for report email to: {}", destination);
         return Ok(json!({
@@ -56,11 +54,10 @@ pub async fn process_ses_event(
         bucket: config.email_bucket.clone(),
         incoming_path: config.incoming_prefix.clone(),
         message_id,
-        original_from,
         forward_to,
     };
 
-    match forward_email(context, request).await {
+    match forward_email(context, request, config).await {
         Ok(forwarded_message_id) => {
             info!("Email forwarded successfully: {}", forwarded_message_id);
             Ok(json!({

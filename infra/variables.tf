@@ -16,6 +16,12 @@ variable "environment" {
   default     = "prod"
 }
 
+variable "log_level" {
+  description = "Logging level for lambda runtime"
+  type        = string
+  default     = "info"
+}
+
 variable "email_general_prefix" {
   description = "Bucket prefix to store general email (human-readable)"
   type        = string
@@ -32,6 +38,17 @@ variable "forward_to_email" {
   description = "Gmail address to forward emails to"
   type        = string
   # This will be set via terraform.tfvars or environment variable
+}
+
+variable "max_email_size_mb" {
+  description = "Maximum email size in MB (1-10, SES limit)"
+  type        = number
+  default     = 10
+
+  validation {
+    condition     = var.max_email_size_mb >= 1 && var.max_email_size_mb <= 10
+    error_message = "max_email_size_mb must be between 1 and 10 MB (SES limit)"
+  }
 }
 
 variable "project_name" {

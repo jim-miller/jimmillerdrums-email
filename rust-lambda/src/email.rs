@@ -80,6 +80,38 @@ pub fn extract_sender_name(from_header: &str) -> String {
     from_header.to_string()
 }
 
+/// Extract Reply-To information from raw email, falling back to From header
+/// Returns (email_address, display_name)
+pub fn extract_reply_to_info(raw_email: &[u8]) -> Result<(String, String), EmailError> {
+    let parsed = parse_mail(raw_email)?;
+
+    // Try Reply-To header first
+    if let Some(reply_to_header) = parsed
+        .headers
+        .iter()
+        .find(|h| h.get_key().eq_ignore_ascii_case("Reply-To"))
+    {
+        let reply_to_value = reply_to_header.get_value();
+        let email = extract_email_address(&reply_to_value)?;
+        let name = extract_sender_name(&reply_to_value);
+        return Ok((email, name));
+    }
+
+    // Fall back to From header
+    if let Some(from_header) = parsed
+        .headers
+        .iter()
+        .find(|h| h.get_key().eq_ignore_ascii_case("From"))
+    {
+        let from_value = from_header.get_value();
+        let email = extract_email_address(&from_value)?;
+        let name = extract_sender_name(&from_value);
+        return Ok((email, name));
+    }
+
+    Err(EmailError::MissingHeader("From or Reply-To".to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -101,5 +133,32 @@ mod tests {
     fn test_extract_sender_name() {
         let name = extract_sender_name("\"John Doe\" <john@example.com>");
         assert_eq!(name, "John Doe");
+    }
+
+    #[test]
+    fn test_extract_reply_to_with_reply_to_header() {
+        let email = b"From: sender@example.com\r\nReply-To: Test Org <replyto@example.com>\r\nSubject: Test\r\n\r\nBody";
+        let result = extract_reply_to_info(email);
+        assert!(result.is_ok());
+        let (email_addr, name) = result.unwrap();
+        assert_eq!(email_addr, "replyto@example.com");
+        assert_eq!(name, "Test Org");
+    }
+
+    #[test]
+    fn test_extract_reply_to_fallback_to_from() {
+        let email = b"From: Test Sender <sender@example.com>\r\nSubject: Test\r\n\r\nBody";
+        let result = extract_reply_to_info(email);
+        assert!(result.is_ok());
+        let (email_addr, name) = result.unwrap();
+        assert_eq!(email_addr, "sender@example.com");
+        assert_eq!(name, "Test Sender");
+    }
+
+    #[test]
+    fn test_extract_reply_to_missing_headers() {
+        let email = b"Subject: Test\r\n\r\nBody";
+        let result = extract_reply_to_info(email);
+        assert!(result.is_err());
     }
 }

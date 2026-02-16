@@ -20,9 +20,11 @@ resource "aws_lambda_function" "email_processor" {
 
   environment {
     variables = {
-      EMAIL_BUCKET     = aws_s3_bucket.email_storage.bucket
-      INCOMING_PREFIX  = var.email_general_prefix
-      FORWARD_TO_EMAIL = var.forward_to_email
+      EMAIL_BUCKET       = aws_s3_bucket.email_storage.bucket
+      INCOMING_PREFIX    = var.email_general_prefix
+      FORWARD_TO_EMAIL   = var.forward_to_email
+      MAX_EMAIL_SIZE_MB  = var.max_email_size_mb
+      RUST_LOG           = var.log_level
     }
   }
 

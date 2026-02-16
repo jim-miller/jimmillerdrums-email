@@ -1,0 +1,55 @@
+Return-Path: <sender@example.com>
+Received: from mail-test.example.com (mail-test.example.com [192.0.2.1])
+ by inbound-smtp.us-east-1.amazonaws.com with SMTP id test123456789
+ for recipient@example.com;
+ Sun, 15 Feb 2026 23:50:50 +0000 (UTC)
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+Received-SPF: pass (spfCheck: domain of example.com designates 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=sender@example.com; helo=mail-test.example.com;
+Authentication-Results: amazonses.com;
+ spf=pass (spfCheck: domain of example.com designates 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=sender@example.com; helo=mail-test.example.com;
+ dkim=pass header.i=@example.com;
+ dmarc=pass header.from=example.com;
+X-SES-RECEIPT: TEST_RECEIPT_TOKEN_REDACTED
+X-SES-DKIM-SIGNATURE: a=rsa-sha256; q=dns/txt; b=TEST_SIGNATURE_REDACTED; c=relaxed/simple; s=test; d=amazonses.com; t=1771199451; v=1; bh=TEST_HASH; h=From:To:Cc:Bcc:Subject:Date:Message-ID:MIME-Version:Content-Type:X-SES-RECEIPT;
+Received: by mail-test.example.com with SMTP id test-smtp-id
+        for <recipient@example.com>; Sun, 15 Feb 2026 15:50:50 -0800 (PST)
+MIME-Version: 1.0
+References: <test-reference-id@mail.example.com>
+In-Reply-To: <test-reference-id@mail.example.com>
+From: Test Sender <sender@example.com>
+Date: Sun, 15 Feb 2026 18:50:37 -0500
+Message-ID: <test-message-id@mail.example.com>
+Subject: Fwd: Test Subject
+To: recipient@example.com
+Content-Type: multipart/alternative; boundary="000000000000f76fc4064ae58143"
+
+--000000000000f76fc4064ae58143
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+---------- Forwarded message ---------
+From: Test Sender <sender@example.com>
+Date: Sun, Feb 15, 2026 at 6:50=E2=80=AFPM
+Subject: Test Subject
+To: Test Recipient <recipient@example.com>
+
+
+https://example.com/document
+
+--000000000000f76fc4064ae58143
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><br><div class=3D"gmail_quote gmail_quote_container"><=
+div dir=3D"ltr" class=3D"gmail_attr">---------- Forwarded message ---------=
+<br>From: <strong class=3D"gmail_sendername" dir=3D"auto">Test Sender</stron=
+g> <span dir=3D"auto">&lt;<a href=3D"mailto:sender@example.com">sender@=
+example.com</a>&gt;</span><br>Date: Sun, Feb 15, 2026 at 6:50=E2=80=AFPM<br>S=
+ubject: Test Subject<br>To: Test Recipient &lt;<a href=3D"mai=
+lto:recipient@example.com">recipient@example.com</a>&gt;<br></div><br><br><=
+div dir=3D"ltr"><a href=3D"https://example.com/document" t=
+arget=3D"_blank">https://example.com/document</a></div>
+</div></div>
+
+--000000000000f76fc4064ae58143--

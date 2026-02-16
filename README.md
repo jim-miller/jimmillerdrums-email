@@ -33,16 +33,17 @@ jimmillerdrums-email/
 ├── rust-lambda/                   # Rust Lambda Function (CURRENT)
 │   ├── src/
 │   │   ├── main.rs                # Lambda runtime initialization
+│   │   ├── config.rs              # Configuration options
 │   │   ├── lib.rs                 # Core business logic
 │   │   ├── domain.rs              # Domain types (Newtype pattern)
 │   │   ├── email.rs               # Email parsing with mailparse
+│   │   ├── mime.rs                # Email header transformations
 │   │   └── aws.rs                 # AWS S3 and SESv2 integration
 │   ├── tests/                     # Integration tests (15 tests)
-│   ├── Cargo.toml                 # Dependencies & Release profiles
-│   └── README.md                  # Rust Lambda documentation
-├── lambda-legacy-backup/          # Old Node.js implementation (DEPRECATED)
+│   └── Cargo.toml                 # Dependencies & Release profiles
 └── docs/                          # Documentation
     ├── RUST_MIGRATION.md          # Migration details
+    ├── GMAIL_INTEGRATION.md       # Gmail integration guide
     ├── DEPLOYMENT_GUIDE.md        # Quick deployment guide
     ├── MONITORING.md              # CloudWatch alarms documentation
     └── LUNCH_AND_LEARN.md         # Marp presentation
@@ -219,11 +220,11 @@ Common issues:
 
 ## 📚 Documentation
 
-- **[RUST_MIGRATION.md](docs/RUST_MIGRATION.md)**: Complete migration story from Node.js to Rust
 - **[DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)**: Quick deployment reference
+- **[GMAIL_INTEGRATION.md](docs/GMAIL_INTEGRATION)**: Details on setting up Gmail
+  to send/receive email
 - **[MONITORING.md](docs/MONITORING.md)**: CloudWatch alarms and alerting
 - **[LUNCH_AND_LEARN.md](docs/LUNCH_AND_LEARN.md)**: Marp presentation on the migration
-- **[rust-lambda/README.md](rust-lambda/README.md)**: Rust Lambda implementation details
 
 ---
 
